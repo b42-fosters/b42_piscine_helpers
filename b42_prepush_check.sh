@@ -1,55 +1,40 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-RED='\033[0;91m'
-GREEN='\033[0;32m'
-NC='\033[0m' # No Color
+# Needed for type builtin and globstar shell option
+[ -z "$BASH_VERSION" ] && { echo "Script must be run with bash!"; exit 1; }
 
-git_root=$(git rev-parse --show-toplevel)
+git_root="$(git rev-parse --show-toplevel)"
 
-summary_status=""
-
-pushd "$git_root"
+pushd -- "$git_root" >/dev/null || {  echo "Couldn't change directory!"; exit 2; }
 echo "== NORM"
-norminette
+"$(type -P norminette)"
 norminette_status=$?
-summary_status="${summary_status}.${norminette_status}"
 
 echo "== CC"
-cc -Wall -Wextra -Werror -c */*.c
+shopt -s globstar
+cc -Wall -Wextra -Werror -c -- **/*.c
 cc_status=$?
-summary_status="${summary_status}.${cc_status}"
+shopt -u globstar
 
 echo "== Files in repo"
 git ls-files
+echo $?
 
 echo "== Git uncommited"
 git status --short --untracked-files=no
-uncommited_status=$(git status --short --untracked-files=no | wc -l | tr -d ' ')
-summary_status="${summary_status}.${uncommited_status}"
+uncommited_status=$(git status --short --untracked-files=no | wc -l)
 
-echo "== Filename to function name"
-not_found=0
-for fname in $(find . -name 'ft_*.c'); do
-	func_name=$(basename -s .c $fname);
-	# grep "^/.*$func_name" "$fname"	# Check for fname in header
-	egrep -H "^(char|int|void)\s+\*?$func_name\(" $fname # Check for the function declaration
-	rc=$?
-	not_found=$((not_found + $rc))
-	if [ $rc -ne 0 ]; then
-		echo -e "$RED$fname$NC: not found declaration for the function $GREEN${func_name}$NC"
-	fi
-done
-summary_status="${summary_status}.${not_found}"
-
-summary_status="${summary_status}."
-summary_status_filtered=$(echo "$summary_status" | tr -d '.0')
-echo "Checks summary code: ${summary_status}"
-if [ "$summary_status_filtered" != "" ];
+RED='\033[0;91m'
+GREEN='\033[0;32m'
+NC='\033[m' # No Color
+if [ "$norminette_status" -ne 0 ] ||
+        [ "$cc_status" -ne 0 ] ||
+        [ "$uncommited_status" -ne 0 ];
 then
-	echo -e "$RED## SOME STEPS CAN BE IMPROVED."
-	echo -e "Do you mind to take a deeper look there?$NC"
+        echo -e "${RED}## SOME STEPS CAN BE IMPROVED."
+        echo -e "Do you mind to take a deeper look there?${NC}"
 else
-	echo -e "$GREEN## I THINK ALL GOOD HERE AT $git_root."
-	echo -e "Good luck with evaluations!$NC"
+        echo -e "${GREEN}## I THINK ALL GOOD HERE AT ${git_root}."
+        echo -e "Good luck with evaluations!${NC}"
 fi
-popd
+popd >/dev/null

@@ -21,7 +21,7 @@ echo $?
 
 echo "== Git uncommited"
 git status --short --untracked-files=no
-uncommited_status=$(git status --short --untracked-files=no | wc -l)
+uncommited_status=$(git status --short --untracked-files=no | wc -l | tr -d ' ')
 summary_status="${summary_status}.${uncommited_status}"
 
 echo "== Filename to function name"
@@ -35,11 +35,11 @@ done
 summary_status="${summary_status}.${not_found}"
 
 summary_status="${summary_status}."
-summary_status_filtered=$(echo "$summary_status" | tr -d.0)
+summary_status_filtered=$(echo "$summary_status" | tr -d '.0')
 RED='\033[0;91m'
 GREEN='\033[0;32m'
 NC='\033[0m' # No Color
-echo "Summary code: ${summary_status}"
+echo "Checks summary code: ${summary_status}"
 if [ "$summary_status_filtered" != "" ];
 then
 	echo -e "$RED## SOME STEPS CAN BE IMPROVED."

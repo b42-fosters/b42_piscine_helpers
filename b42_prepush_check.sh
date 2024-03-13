@@ -1,5 +1,9 @@
 #!/bin/bash
 
+RED='\033[0;91m'
+GREEN='\033[0;32m'
+NC='\033[0m' # No Color
+
 git_root=$(git rev-parse --show-toplevel)
 
 summary_status=""
@@ -17,7 +21,6 @@ summary_status="${summary_status}.${cc_status}"
 
 echo "== Files in repo"
 git ls-files
-echo $?
 
 echo "== Git uncommited"
 git status --short --untracked-files=no
@@ -30,15 +33,16 @@ for fname in $(find . -name 'ft_*.c'); do
 	func_name=$(basename -s .c $fname);
 	# grep "^/.*$func_name" "$fname"	# Check for fname in header
 	egrep -H "^(char|int|void)\s+\*?$func_name\(" $fname # Check for the function declaration
-	not_found=$((not_found + $?))
+	rc=$?
+	not_found=$((not_found + $rc))
+	if [ $rc -ne 0 ]; then
+		echo -e "$RED$fname$NC: not found declaration for the function $GREEN${func_name}$NC"
+	fi
 done
 summary_status="${summary_status}.${not_found}"
 
 summary_status="${summary_status}."
 summary_status_filtered=$(echo "$summary_status" | tr -d '.0')
-RED='\033[0;91m'
-GREEN='\033[0;32m'
-NC='\033[0m' # No Color
 echo "Checks summary code: ${summary_status}"
 if [ "$summary_status_filtered" != "" ];
 then

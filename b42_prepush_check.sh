@@ -18,6 +18,7 @@ echo "== CC"
 cc -Wall -Wextra -Werror -c */*.c
 cc_status=$?
 summary_status="${summary_status}.${cc_status}"
+# https://github.com/b42-fosters/b42_helpers/issues/3
 
 echo "== Files in repo"
 git ls-files

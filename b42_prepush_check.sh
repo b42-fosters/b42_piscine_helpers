@@ -11,9 +11,9 @@ git_root="$(git rev-parse --show-toplevel)"
 
 summary_status=""
 
-pushd -- "$git_root" >/dev/null || {  echo "Couldn't change directory!"; exit 2; }
+pushd "$git_root" >/dev/null || {  echo "Couldn't change directory!"; exit 2; }
 echo "== NORM"
-"$(type -P norminette)"
+norminette
 norminette_status=$?
 summary_status="${summary_status}.${norminette_status}"
 
@@ -37,7 +37,7 @@ not_found=0
 OLDIFS="${IFS}"
 IFS=$'\n'
 for fname in $(find . -name 'ft_*.c'); do
-	func_name="$(basename -- "$fname" .c)"
+	func_name="$(basename -s .c -- "$fname")"
 	# grep "^/.*$func_name" "$fname"	# Check for fname in header
 	grep -EH "^(char|int|void|long)\s+\**${func_name}\(" "$fname" # Check for the function declaration
 	rc=$?

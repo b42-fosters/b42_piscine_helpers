@@ -39,7 +39,7 @@ IFS=$'\n'
 for fname in $(find . -name 'ft_*.c'); do
 	func_name="$(basename -- "$fname" .c)"
 	# grep "^/.*$func_name" "$fname"	# Check for fname in header
-	grep -EH "^(char|int|void|long)\s+\*+${func_name}\(" "$fname" # Check for the function declaration
+	grep -EH "^(char|int|void|long)\s+\**${func_name}\(" "$fname" # Check for the function declaration
 	rc=$?
 	not_found=$((not_found + rc))
 	if [ $rc -ne 0 ]; then

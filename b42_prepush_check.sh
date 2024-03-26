@@ -15,10 +15,13 @@ norminette_status=$?
 summary_status="${summary_status}.${norminette_status}"
 
 echo "== CC"
-cc -Wall -Wextra -Werror -c */*.c
-cc_status=$?
+cc_status=0
+for fname in $(find . -name 'ft_*.c'); do
+	cc -Wall -Wextra -Werror -o /dev/null -c "$fname"
+	rc=$?
+	cc_status=$((cc_status + rc))
+done
 summary_status="${summary_status}.${cc_status}"
-# https://github.com/b42-fosters/b42_helpers/issues/3
 
 echo "== Files in repo"
 git ls-files
